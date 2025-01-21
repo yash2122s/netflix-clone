@@ -1,0 +1,126 @@
+:root {
+    --netflix-red: #E50914;
+    --netflix-background: #141414;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://assets.nflxext.com/ffe/siteui/vlv3/9c5457b8-9ab0-4a04-9fc1-e608d5670f1a/710d74e0-7158-408e-8d9b-23c219dee5df/IN-en-20210719-popsignuptwoweeks-perspective_alpha_website_small.jpg');
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+}
+
+.nav {
+    padding: 20px 50px;
+}
+
+.nav-logo {
+    width: 150px;
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+}
+
+.login-box {
+    background: rgba(0, 0, 0, 0.75);
+    padding: 60px 68px 40px;
+    width: 100%;
+    max-width: 450px;
+    border-radius: 4px;
+}
+
+.login-box h2 {
+    color: white;
+    font-size: 32px;
+    margin-bottom: 28px;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.form-group input {
+    width: 100%;
+    height: 50px;
+    padding: 16px 20px 0;
+    border: none;
+    border-radius: 4px;
+    background: #333;
+    color: white;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.form-group label {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    color: #8c8c8c;
+    transition: all 0.1s ease;
+    pointer-events: none;
+}
+
+.form-group input:focus + label,
+.form-group input:valid + label {
+    top: 30%;
+    font-size: 11px;
+}
+
+.signin-button {
+    width: 100%;
+    height: 50px;
+    background: var(--netflix-red);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 24px 0 12px;
+    cursor: pointer;
+}
+
+.form-help {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #b3b3b3;
+    font-size: 13px;
+}
+
+.remember {
+    display: flex;
+    align-items: center;
+}
+
+.remember input {
+    margin-right: 5px;
+}
+
+.form-help a {
+    color: #b3b3b3;
+    text-decoration: none;
+}
+
+.signup-now {
+    color: #737373;
+    font-size: 16px;
+    margin-top: 16px;
+}
+
+.signup-now a {
+    color: white;
+    text-decoration: none;
+}
+
+.signup-now a:hover {
+    text-decoration: underline;
+} 

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Netflix Clone - Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #141414;
+            color: white;
+        }
+        .upload-container {
+            background: #232323;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #e50914;
+        }
+        input[type="file"] {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 100%;
+        }
+        button {
+            background: #e50914;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #f40612;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #333;
+            border-radius: 4px;
+        }
+        .success {
+            color: #2ecc71;
+        }
+        .error {
+            color: #e74c3c;
+        }
+        img {
+            max-width: 300px;
+            margin-top: 10px;
+        }
+        video {
+            max-width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Upload Test</h2>
+
+    <div class="upload-container">
+        <h3>Upload Image/Thumbnail</h3>
+        <form id="imageForm">
+            <input type="file" id="image" accept="image/*" required />
+            <button type="submit">Upload Image</button>
+        </form>
+        <div id="imageResult"></div>
+    </div>
+
+    <div class="upload-container">
+        <h3>Upload Video</h3>
+        <form id="videoForm">
+            <input type="file" id="video" accept="video/*" required />
+            <button type="submit">Upload Video</button>
+        </form>
+        <div id="videoResult"></div>
+    </div>
+
+    <script>
+        // Image upload handler
+        document.getElementById('imageForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            const imageFile = document.getElementById('image').files[0];
+            formData.append('image', imageFile);
+
+            try {
+                const response = await fetch('http://localhost:3000/api/upload/image', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('imageResult').innerHTML = `
+                        <p class="success">✅ Image uploaded successfully!</p>
+                        <img src="${data.url}" alt="Uploaded image" />
+                    `;
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                document.getElementById('imageResult').innerHTML = `
+                    <p class="error">❌ Upload failed: ${error.message}</p>
+                `;
+            }
+        });
+
+        // Video upload handler
+        document.getElementById('videoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            const videoFile = document.getElementById('video').files[0];
+            formData.append('video', videoFile);
+
+            try {
+                const response = await fetch('http://localhost:3000/api/upload/video', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('videoResult').innerHTML = `
+                        <p class="success">✅ Video uploaded successfully!</p>
+                        <video controls>
+                            <source src="${data.url}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    `;
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                document.getElementById('videoResult').innerHTML = `
+                    <p class="error">❌ Upload failed: ${error.message}</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html> 
