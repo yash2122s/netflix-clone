@@ -35,11 +35,9 @@ router.get('/videos/list', async (req, res) => {
 // Upload video route
 router.post('/video', upload.single('video'), async (req, res) => {
     try {
-        // Convert buffer to base64
         const fileStr = req.file.buffer.toString('base64');
         const uploadStr = `data:${req.file.mimetype};base64,${fileStr}`;
         
-        // Upload to cloudinary
         const uploadResponse = await cloudinary.uploader.upload(uploadStr, {
             resource_type: 'video',
             folder: 'netflix-clone/videos'

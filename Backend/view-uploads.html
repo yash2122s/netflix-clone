@@ -50,20 +50,19 @@
     </div>
 
     <script>
-        // Function to fetch and display videos
         async function loadVideos() {
+            const videoGrid = document.getElementById('videoGrid');
+            videoGrid.innerHTML = 'Please wait... Server might take 30-50 seconds to wake up...';
+            
             try {
                 const response = await fetch('https://netflix-clone-yash.onrender.com/api/upload/videos/list');
                 const data = await response.json();
-                
-                const videoGrid = document.getElementById('videoGrid');
                 
                 if (data.resources && data.resources.length > 0) {
                     videoGrid.innerHTML = data.resources.map(video => `
                         <div class="video-card">
                             <video controls>
                                 <source src="${video.secure_url}" type="video/mp4">
-                                Your browser does not support the video tag.
                             </video>
                             <div class="upload-time">
                                 Uploaded: ${new Date(video.created_at * 1000).toLocaleString()}
@@ -71,24 +70,13 @@
                         </div>
                     `).join('');
                 } else {
-                    videoGrid.innerHTML = `
-                        <div class="error-message">
-                            <p>No videos found. Try uploading some videos first!</p>
-                        </div>
-                    `;
+                    videoGrid.innerHTML = 'No videos found. Try uploading some!';
                 }
             } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('videoGrid').innerHTML = `
-                    <div class="error-message">
-                        <p>Error loading videos: ${error.message}</p>
-                        <p>Make sure the server is running on port 3000</p>
-                    </div>
-                `;
+                videoGrid.innerHTML = `Error: ${error.message}. Try refreshing in 30 seconds.`;
             }
         }
 
-        // Load videos when page loads
         loadVideos();
     </script>
 </body>
