@@ -1,59 +1,80 @@
 const express = require('express');
 const cors = require('cors');
-const uploadRoutes = require('./routes/upload');
+const cloudinary = require('cloudinary').v2;
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
 
-// CORS configuration
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-// Middleware with increased limits
+// Middleware
+app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Basic health check
+// Configure Cloudinary
+cloudinary.config({ 
+    cloud_name: 'dvtrsojsa', 
+    api_key: '874763935182255',
+    api_secret: 'Y1hLeVV_RihGpiNv08Na2Zxum_I'
+});
+
+// Test route
 app.get('/', (req, res) => {
-    res.status(200).json({
-        status: 'alive',
-        message: 'Server is running!',
-        timestamp: new Date().toISOString()
-    });
+    res.json({ status: 'alive', message: 'Server is running!' });
 });
 
-// Routes
-app.use('/api/upload', uploadRoutes);
+// Upload video route
+app.post('/api/upload/video', upload.single('video'), async (req, res) => {
+    try {
+        const fileStr = req.file.buffer.toString('base64');
+        const uploadStr = `data:${req.file.mimetype};base64,${fileStr}`;
+        
+        const uploadResponse = await cloudinary.uploader.upload(uploadStr, {
+            resource_type: 'video',
+            folder: 'netflix-clone/videos'
+        });
+        
+        res.json({ 
+            success: true,
+            url: uploadResponse.secure_url,
+            message: 'Video uploaded successfully!'
+        });
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Failed to upload video'
+        });
+    }
+});
 
-// Error handling middleware
+// List videos route
+app.get('/api/upload/videos/list', async (req, res) => {
+    try {
+        const result = await cloudinary.search
+            .expression('resource_type:video AND folder:netflix-clone/videos')
+            .sort_by('created_at', 'desc')
+            .max_results(30)
+            .execute();
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error fetching videos:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Failed to fetch videos'
+        });
+    }
+});
+
+// Error handling
 app.use((err, req, res, next) => {
-    console.error('Error:', err);
-    res.status(500).json({
-        error: err.message,
-        path: req.path,
-        timestamp: new Date().toISOString()
-    });
+    console.error(err.stack);
+    res.status(500).json({ error: err.message });
 });
 
-// Handle 404
-app.use((req, res) => {
-    res.status(404).json({
-        error: 'Route not found',
-        path: req.path
-    });
-});
-
-// Start server with error handling
+// Start server
 const PORT = process.env.PORT || 10000;
-const server = app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
-}).on('error', (err) => {
-    console.error('Server failed to start:', err);
-});
-
-// Handle unhandled rejections
-process.on('unhandledRejection', (err) => {
-    console.error('Unhandled Rejection:', err);
 }); 

@@ -1,4 +1,10 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://netflix-clone-yash.onrender.com/api'; // Update to your Render URL
+
+// Temporary user data for frontend testing
+const TEST_USERS = [
+    { email: 'admin@netflix.com', password: 'admin123', role: 'admin' },
+    { email: 'user@netflix.com', password: 'user123', role: 'user' }
+];
 
 // Check if user is already logged in when the page loads
 document.addEventListener('DOMContentLoaded', () => {
@@ -23,69 +29,57 @@ async function handleLogin(e) {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     
-    try {
-        const response = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-        
-        if (response.ok) {
-            // Store token and user data
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('userRole', data.user.role);
-            localStorage.setItem('userEmail', data.user.email);
-            
-            // Redirect based on role
-            if (data.user.role === 'admin') {
-                window.location.href = 'admin.html';
-            } else {
-                window.location.href = 'index.html';
-            }
-        } else {
-            alert(data.message || 'Login failed');
-        }
-    } catch (error) {
-        console.error('Login error:', error);
-        alert('Login failed. Please try again.');
-    }
-}
-
-function checkAuth() {
-    const token = localStorage.getItem('token');
-    const userRole = localStorage.getItem('userRole');
+    // Find user
+    const user = TEST_USERS.find(u => u.email === email && u.password === password);
     
-    if (!token) {
-        window.location.href = 'login.html';
-        return;
+    if (user) {
+        // Store user info in localStorage
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userRole', user.role);
+        localStorage.setItem('userEmail', user.email);
+        
+        // Redirect based on role
+        if (user.role === 'admin') {
+            window.location.href = 'admin.html';
+        } else {
+            window.location.href = 'index.html';
+        }
+    } else {
+        alert('Invalid email or password');
     }
-
-    // Verify token with backend
-    fetch(`${API_URL}/auth/verify`, {
-        headers: {
-            'x-auth-token': token
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Token invalid');
-        }
-    })
-    .catch(() => {
-        logout();
-    });
 }
 
+// Check if user is logged in
+function checkAuth() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const currentPage = window.location.pathname.split('/').pop();
+    
+    if (!isLoggedIn && currentPage !== 'login.html') {
+        window.location.href = 'login.html';
+    }
+}
+
+// Logout function
 function logout() {
-    localStorage.removeItem('token');
+    localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('userRole');
     localStorage.removeItem('userEmail');
     window.location.href = 'login.html';
 }
+
+// Add event listeners when document loads
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+    
+    // Add logout handler to profile menu if it exists
+    const profileMenu = document.querySelector('.profile');
+    if (profileMenu) {
+        profileMenu.addEventListener('click', logout);
+    }
+});
 
 // Add this to check current login state
 function getCurrentUser() {

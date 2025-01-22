@@ -1,5 +1,29 @@
 const API_URL = 'http://localhost:5000/api';
 
+// Cloudinary configuration
+const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dvtrsojsa/video/list';
+const CLOUDINARY_PRESET = 'netflix-clone';
+
+// Sample movie data (until backend is ready)
+const SAMPLE_MOVIES = [
+    {
+        id: 1,
+        title: "Stranger Things",
+        category: "TV Shows",
+        year: "2022",
+        image: "https://res.cloudinary.com/dvtrsojsa/image/upload/v1/netflix-clone/posters/stranger-things",
+        video: "https://res.cloudinary.com/dvtrsojsa/video/upload/v1/netflix-clone/videos/stranger-things"
+    },
+    {
+        id: 2,
+        title: "The Witcher",
+        category: "TV Shows",
+        year: "2021",
+        image: "https://res.cloudinary.com/dvtrsojsa/image/upload/v1/netflix-clone/posters/witcher",
+        video: "https://res.cloudinary.com/dvtrsojsa/video/upload/v1/netflix-clone/videos/witcher"
+    }
+];
+
 async function loadMovies() {
     try {
         const response = await fetch(`${API_URL}/movies`);
@@ -13,53 +37,76 @@ async function loadMovies() {
 }
 
 function displayMovies(movies) {
-    const movieGrid = document.querySelector('.movie-grid');
+    const movieGrid = document.querySelector('.cards-container');
+    if (!movieGrid) return;
+
     movieGrid.innerHTML = movies.map(movie => `
-        <div class="movie-card" onclick="playMovie('${movie._id}')">
+        <div class="card" onclick="playMovie('${movie.id}')">
             <img src="${movie.image}" alt="${movie.title}">
-            <div class="movie-info">
-                <h3>${movie.title}</h3>
-                <p>${movie.category} | ${movie.year}</p>
+            <div class="card-overlay">
+                <div class="card-buttons">
+                    <button class="card-button play-button">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button class="card-button">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="card-button">
+                        <i class="fas fa-thumbs-up"></i>
+                    </button>
+                </div>
+                <div class="card-info">
+                    <h3>${movie.title}</h3>
+                    <p>${movie.category} • ${movie.year}</p>
+                </div>
             </div>
         </div>
     `).join('');
+
+    // Add click handlers for play buttons
+    document.querySelectorAll('.play-button').forEach((button, index) => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playMovie(movies[index].id);
+        });
+    });
 }
 
-async function playMovie(movieId) {
-    try {
-        const response = await fetch(`${API_URL}/movies/${movieId}`);
-        if (!response.ok) throw new Error('Failed to load movie');
-        
-        const movie = await response.json();
-        
-        const videoOverlay = document.createElement('div');
-        videoOverlay.className = 'video-overlay';
-        videoOverlay.innerHTML = `
-            <div class="video-player">
-                <div class="video-header">
-                    <h2>${movie.title}</h2>
-                    <button class="close-button">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <video controls autoplay>
-                    <source src="${movie.video}" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
+function playMovie(movieId) {
+    const movie = SAMPLE_MOVIES.find(m => m.id === parseInt(movieId));
+    if (!movie) return;
+
+    const videoOverlay = document.createElement('div');
+    videoOverlay.className = 'video-overlay';
+    videoOverlay.innerHTML = `
+        <div class="video-player">
+            <div class="video-header">
+                <h2>${movie.title}</h2>
+                <button class="close-button">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-        `;
+            <video controls autoplay>
+                <source src="${movie.video}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    `;
 
-        // Add close functionality
-        const closeButton = videoOverlay.querySelector('.close-button');
-        closeButton.addEventListener('click', () => {
+    // Add close functionality
+    const closeButton = videoOverlay.querySelector('.close-button');
+    closeButton.addEventListener('click', () => {
+        document.body.removeChild(videoOverlay);
+    });
+
+    // Close on clicking outside
+    videoOverlay.addEventListener('click', (e) => {
+        if (e.target === videoOverlay) {
             document.body.removeChild(videoOverlay);
-        });
+        }
+    });
 
-        document.body.appendChild(videoOverlay);
-    } catch (error) {
-        console.error('Error playing movie:', error);
-        alert('Failed to play movie');
-    }
+    document.body.appendChild(videoOverlay);
 }
 
 // Initialize the page
